@@ -7,6 +7,8 @@ public class LoggerFactory {
 	}
 }
 class LoggerOption {
+	static public LoggerWriter logWriter=new LoggerWriter();//null;
+
 	static public boolean debugEnabled=false;
 	static public boolean errorEnabled=false;
 	static public boolean infoEnabled=false;

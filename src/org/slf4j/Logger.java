@@ -9,47 +9,57 @@ public class Logger {
 
 	private String mClassName="";
 //	private static LoggerOption mLoggerOption=null;
-	private StringBuilder log_builder=new StringBuilder(1024);
+	private StringBuilder logBuilder=new StringBuilder(1024);
+	
 	public Logger(Class log_class, LoggerOption log_opt) {
 		mClassName=log_class.getName();
+//		LoggerOption.logWriter=new LoggerWriter();
 //		mLoggerOption=log_opt;
 	}
 	
 	private void putLogMsg(Exception e, String ...msg) {
-		log_builder.setLength(0);
-		if (LoggerOption.appendTime) {
-			log_builder.append(convDateTime(System.currentTimeMillis()));
-			log_builder.append(" ");
+		synchronized(logBuilder) {
+			logBuilder.setLength(0);
+			if (LoggerOption.appendTime) {
+				logBuilder.append(convDateTime(System.currentTimeMillis()));
+				logBuilder.append(" ");
+			}
+			for(String m:msg) logBuilder.append(m).append(" ");
+			if (e!=null) {
+//				log_builder.append(e.getMessage());
+				StringWriter stringWriter = new StringWriter();
+	            PrintWriter printWriter = new PrintWriter( stringWriter );
+	            e.printStackTrace( printWriter );
+	            logBuilder.append("\n").append(stringWriter.toString());
+			}
+			writeMsg(logBuilder.toString());
 		}
-		for(String m:msg) log_builder.append(m).append(" ");
-		if (e!=null) {
-//			log_builder.append(e.getMessage());
-			StringWriter stringWriter = new StringWriter();
-            PrintWriter printWriter = new PrintWriter( stringWriter );
-            e.printStackTrace( printWriter );
-            log_builder.append("\n").append(stringWriter.toString());
-		}
-		System.out.println(log_builder.toString());
+	}
+	
+	public void setWriter(LoggerWriter lw) {
+		LoggerOption.logWriter=lw;
+	}
+	
+	private void writeMsg(String msg) {
+		LoggerOption.logWriter.write(msg);
 	}
 	
 	public void info(String msg, Exception e) {
-		if (isInfoEnabled()) {
-			putLogMsg(e, "[Info ]", mClassName, msg);
-		}
+		if (isInfoEnabled())    putLogMsg(e, "[Info ]", mClassName, msg);
 	}
 	
 	public void debug(String msg, Exception e) {
-		if (isDebugEnabled()) putLogMsg(e, "[Debug]", mClassName,msg);
+		if (isDebugEnabled())   putLogMsg(e, "[Debug]", mClassName,msg);
 	}
 	public void warn(String msg, Exception e) {
-		if (isWarnEnabled()) putLogMsg(e, mClassName,"[Warn ]",msg);
+		if (isWarnEnabled())    putLogMsg(e, "[Warn ]", mClassName, msg);
 	}
 	public void trace(String msg, Exception e) {
-		if (isTraceEnabled()) putLogMsg(e, "[Trace]",mClassName,msg);
+		if (isTraceEnabled())   putLogMsg(e, "[Trace]",mClassName,msg);
 	}
 
 	public void error(String msg, Exception e) {
-		if (isErrorEnabled()) putLogMsg(e, "[Error]",mClassName,msg);
+		if (isErrorEnabled())   putLogMsg(e, "[Error]",mClassName,msg);
 	}
 
 	public void info(String msg) {
