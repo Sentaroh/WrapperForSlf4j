@@ -25,10 +25,11 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 public class LoggerFactory {
 	private static LoggerOption logger_option=new LoggerOption();
-	public static Logger getLogger(Class log_class) {
+	public static Logger getLogger(Class<?> log_class) {
 		return new Logger(log_class, logger_option);
 	}
 }
+
 class LoggerOption {
 	static public LoggerWriter logWriter=new LoggerWriter();//null;
 
